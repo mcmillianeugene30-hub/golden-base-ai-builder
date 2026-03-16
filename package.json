@@ -1,12 +1,13 @@
 {
   "name": "golden-base-ai-builder",
-  "version": "1.0.0",
-  "description": "AI-powered miniapps builder with token deployment on Base",
+  "version": "2.0.0",
+  "description": "AI-powered miniapps builder with free AI APIs, subscriptions, payments, and connector marketplace",
   "main": "index.js",
   "scripts": {
     "dev": "bun run src/index.ts",
     "build": "bun build src/index.ts",
-    "start": "bun run src/index.ts"
+    "start": "bun run src/index.ts",
+    "db:init": "bun run src/lib/init-db.ts"
   },
   "keywords": [
     "ai",
@@ -16,17 +17,28 @@
     "base",
     "defi",
     "token",
-    "ethereum"
+    "ethereum",
+    "groq",
+    "openrouter",
+    "payments",
+    "subscriptions",
+    "marketplace"
   ],
   "author": "Eugene McMillan",
   "license": "MIT",
   "dependencies": {
     "hono": "^4.0.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "stripe": "^14.14.0",
+    "better-sqlite3": "^9.4.0",
+    "viem": "^2.9.0",
+    "zod": "^3.22.0",
+    "nanoid": "^5.0.4"
   },
   "devDependencies": {
     "@types/react": "^18.2.0",
+    "@types/better-sqlite3": "^7.6.9",
     "typescript": "^5.3.0"
   }
 }
