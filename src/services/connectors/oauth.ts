@@ -3,9 +3,10 @@
  */
 
 import crypto from 'crypto';
-import { getDb } from '../lib/db';
+import { getDb } from '../../lib/db';
 import { SubscriptionService } from '../subscription';
 import { getConnector } from './registry';
+import { adminService } from '../admin';
 
 export interface OAuthState {
   userId: number;
@@ -117,6 +118,8 @@ export class OAuthService {
 
       if (!connectorRow) {
         // Create connector record if it doesn't exist
+        // Use admin service's creator revenue share (60%)
+        const developerSharePercent = adminService.getCreatorRevenueShare();
         const insertStmt = db.prepare(`
           INSERT INTO connectors (connector_id, name, description, category, price_per_use, revenue_share, status)
           VALUES (?, ?, ?, ?, ?, ?, 'active')
@@ -128,7 +131,7 @@ export class OAuthService {
           connector.description,
           connector.category,
           connector.pricePerUse,
-          connector.developerShare
+          developerSharePercent
         );
 
         connectorRow = { id: result.lastInsertRowid };
@@ -222,7 +225,7 @@ export class OAuthService {
       return { success: false, error: 'Connector not authorized' };
     }
 
-    // Deduct credits
+    // Deduct credits (admin service handles bypassing for admin)
     const success = await this.subscriptionService.deductCredits(
       userId,
       connector.pricePerUse,
@@ -234,8 +237,10 @@ export class OAuthService {
       return { success: false, error: 'Insufficient credits' };
     }
 
-    // Calculate revenue share
-    const developerEarned = Math.floor(connector.pricePerUse * (connector.developerShare / 100));
+    // Calculate revenue share using admin service configuration (40% platform, 60% developer)
+    const platformSharePercent = adminService.getPlatformRevenueShare();
+    const developerSharePercent = adminService.getCreatorRevenueShare();
+    const developerEarned = Math.floor(connector.pricePerUse * (developerSharePercent / 100));
     const platformEarned = connector.pricePerUse - developerEarned;
 
     // Record usage
@@ -245,6 +250,13 @@ export class OAuthService {
     `);
 
     usageStmt.run(auth.id, action, connector.pricePerUse, developerEarned, platformEarned);
+
+    // Record platform earnings
+    adminService.recordPlatformEarnings(
+      auth.id,
+      platformEarned,
+      `Connector usage: ${connector.name} - ${action} - Platform share (${platformSharePercent}%)`
+    );
 
     return { success: true, creditsUsed: connector.pricePerUse };
   }

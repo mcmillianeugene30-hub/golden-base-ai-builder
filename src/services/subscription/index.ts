@@ -3,7 +3,8 @@
  */
 
 import type { Subscription, CreditBalance } from '../types/subscription';
-import { getDb } from '../lib/db';
+import { getDb } from '../../lib/db';
+import { adminService } from '../admin';
 
 export interface SubscriptionTier {
   name: string;
@@ -86,7 +87,12 @@ export class SubscriptionService {
   /**
    * Get or create user subscription
    */
-  async getUserSubscription(userId: number): Promise<Subscription | null> {
+  async getUserSubscription(userId: number, fid?: number): Promise<Subscription | null> {
+    // Check if user is admin with unlimited access
+    if (fid && adminService.hasUnlimitedAccess(fid)) {
+      return adminService.getAdminSubscription();
+    }
+
     const stmt = this.db.prepare(`
       SELECT * FROM subscriptions
       WHERE user_id = ? AND status IN ('active', 'past_due')
@@ -193,8 +199,21 @@ export class SubscriptionService {
     userId: number,
     amount: number,
     description: string,
-    relatedId?: string
+    relatedId?: string,
+    fid?: number
   ): Promise<boolean> {
+    // Check if user is admin with unlimited access
+    if (fid && adminService.bypassCreditCheck(fid)) {
+      // Admin doesn't need credits, return success without deducting
+      const stmt = this.db.prepare(`
+        INSERT INTO credit_transactions (user_id, amount, type, description, related_id)
+        VALUES (?, ?, 'usage', ?, ?)
+      `);
+
+      stmt.run(userId, 0, `${description} (Admin - no charge)`, relatedId || null);
+      return true;
+    }
+
     const balance = await this.getCreditBalance(userId);
 
     if (balance.balance < amount) {

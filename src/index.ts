@@ -14,6 +14,7 @@ import subscriptionRouter from './api/subscription';
 import paymentRouter from './api/payment';
 import connectorRouter from './api/connectors';
 import marketplaceRouter from './api/marketplace';
+import adminRouter from './api/admin';
 
 const app = new Hono();
 
@@ -39,6 +40,7 @@ app.route('/api/subscription', subscriptionRouter);
 app.route('/api/payment', paymentRouter);
 app.route('/api/connectors', connectorRouter);
 app.route('/api/marketplace', marketplaceRouter);
+app.route('/api/admin', adminRouter);
 
 // Serve static files (for frontend assets)
 app.use('/*', serveStatic({ root: './dist' }));
