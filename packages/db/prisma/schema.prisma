@@ -1,0 +1,191 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String           @id @default(cuid())
+  fid            Int?             @unique
+  username       String?
+  walletAddress  String?          @unique
+  email          String?
+  credits        Int              @default(0)
+  isAdmin        Boolean          @default(false)
+  subscription   Subscription?    @relation(fields: [subscriptionId], references: [id])
+  subscriptionId String?          @unique
+  apps           App[]
+  apiUsage       ApiUsage[]
+  connectors     ConnectorAuth[]
+  transactions   Transaction[]
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  @@index([fid])
+  @@index([walletAddress])
+}
+
+model Subscription {
+  id                    String   @id @default(cuid())
+  userId                String   @unique
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tier                  String   
+  status                String   
+  stripeSubscriptionId  String?  @unique
+  credits               Int      @default(0)
+  maxApps               Int      @default(3)
+  renewAt               DateTime?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([userId])
+  @@index([stripeSubscriptionId])
+}
+
+model App {
+  id          String      @id @default(cuid())
+  userId      String
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  code        String      @db.Text
+  versions    Version[]
+  deployments Deployment[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([userId])
+}
+
+model Version {
+  id        String   @id @default(cuid())
+  appId     String
+  app       App      @relation(fields: [appId], references: [id], onDelete: Cascade)
+  code      String   @db.Text
+  comment   String?
+  createdAt DateTime @default(now())
+
+  @@index([appId])
+}
+
+model Deployment {
+  id          String   @id @default(cuid())
+  appId       String
+  app         App      @relation(fields: [appId], references: [id], onDelete: Cascade)
+  platform    String   
+  url         String?
+  status      String   
+  createdAt   DateTime @default(now())
+
+  @@index([appId])
+}
+
+model ApiUsage {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider    String   
+  model       String
+  creditsUsed Int
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model ConnectorAuth {
+  id           String    @id @default(cuid())
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  connector    String
+  accessToken  String    @db.Text
+  refreshToken String?   @db.Text
+  expiresAt    DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@unique([userId, connector])
+  @@index([userId])
+}
+
+model ConnectorUsage {
+  id          String   @id @default(cuid())
+  userId      String
+  connector   String
+  action      String
+  creditsUsed Int
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([connector])
+}
+
+model ConnectorRevenue {
+  id             String    @id @default(cuid())
+  connectorId    String
+  developerId    String
+  totalRevenue   Decimal   @default(0) @db.Decimal(18, 6)
+  platformShare  Decimal   @default(0) @db.Decimal(18, 6)
+  developerShare Decimal   @default(0) @db.Decimal(18, 6)
+  status         String    
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([developerId])
+  @@index([connectorId])
+}
+
+model Transaction {
+  id               String    @id @default(cuid())
+  userId           String
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type             String    
+  amount           Decimal   @db.Decimal(18, 6)
+  currency         String    
+  method           String    
+  status           String    
+  stripePaymentId  String?   @unique
+  txHash           String?
+  metadata         Json?
+  createdAt        DateTime  @default(now())
+
+  @@index([userId])
+  @@index([type])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model MarketplaceItem {
+  id          String    @id @default(cuid())
+  type        String    
+  name        String
+  description String    @db.Text
+  developerId String
+  price       Decimal?  @db.Decimal(18, 6)
+  rating      Float     @default(0)
+  reviews     Int       @default(0)
+  installs    Int       @default(0)
+  status      String    @default("pending")
+  manifest    Json?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([type])
+  @@index([developerId])
+  @@index([status])
+}
+
+model Connector {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  displayName String
+  description String   @db.Text
+  category    String
+  pricing     Json    
+  enabled     Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
