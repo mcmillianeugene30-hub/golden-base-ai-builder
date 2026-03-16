@@ -3,8 +3,9 @@
  * One-tap payments through Farcaster Frames
  */
 
-import { getDb } from '../lib/db';
+import { getDb } from '../../lib/db';
 import { SubscriptionService } from '../subscription';
+import { adminService } from '../admin';
 
 export class FramesPaymentService {
   private subscriptionService = new SubscriptionService();
@@ -37,7 +38,7 @@ export class FramesPaymentService {
     }
 
     const amount = currency === 'usdc' ? pkg.usdcPrice : pkg.ethPrice;
-    const platformAddress = process.env.PLATFORM_WALLET_ADDRESS || '0x0000000000000000000000000000000000000000';
+    const platformAddress = adminService.getPlatformWalletAddress();
 
     // Create pending payment
     const stmt = db.prepare(`
@@ -130,6 +131,13 @@ export class FramesPaymentService {
         payment.credits_purchased,
         'purchase',
         `Frame payment completed (TX: ${txHash})`
+      );
+
+      // Record platform revenue share (40% of payment goes to platform)
+      adminService.recordPlatformEarnings(
+        payment.id,
+        payment.amount,
+        `Frame payment - Platform revenue share (40%)`
       );
 
       return { success: true, creditsAdded: payment.credits_purchased };

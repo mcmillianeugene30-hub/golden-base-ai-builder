@@ -12,6 +12,69 @@ Most endpoints require FID (Farcaster ID) for authentication:
 }
 ```
 
+## Admin APIs
+
+### GET /api/admin/status
+Get admin configuration status.
+
+**Response:**
+```json
+{
+  "success": true,
+  "status": {
+    "adminConfigured": true,
+    "adminFid": 1378286,
+    "adminUsername": "urbanwarrior79",
+    "platformWalletAddress": "0xcc9569bF1d87B7a18BD3363413b823AaF06084d3",
+    "platformRevenueShare": 40,
+    "creatorRevenueShare": 60
+  }
+}
+```
+
+### GET /api/admin/check?fid=1378286
+Check if a user is admin and their privileges.
+
+**Response:**
+```json
+{
+  "success": true,
+  "isAdmin": true,
+  "hasUnlimitedAccess": true,
+  "privileges": {
+    "freeUnlimitedAccess": true,
+    "bypassSubscriptionChecks": true,
+    "bypassCreditChecks": true
+  }
+}
+```
+
+### POST /api/admin/revenue-split
+Calculate revenue split for a payment amount.
+
+**Request:**
+```json
+{
+  "amount": 100.00
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "totalAmount": 100,
+  "platform": {
+    "percent": 40,
+    "amount": 40.00
+  },
+  "creator": {
+    "percent": 60,
+    "amount": 60.00
+  }
+}
+```
+
 ## Subscription APIs
 
 ### GET /api/subscription/tier

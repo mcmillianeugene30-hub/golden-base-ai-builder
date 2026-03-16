@@ -5,6 +5,8 @@
 
 import Stripe from 'stripe';
 import { SubscriptionService } from '../subscription';
+import { adminService } from '../admin';
+import { getDb } from '../../lib/db';
 
 if (!process.env.STRIPE_SECRET_KEY) {
   console.warn('STRIPE_SECRET_KEY not configured, Stripe payments will not work');
@@ -278,11 +280,21 @@ export class StripeService {
   ): Promise<void> {
     const db = getDb();
 
+    // Record payment and platform earnings
     const stmt = db.prepare(`
       INSERT INTO payments (user_id, amount, currency, method, status, stripe_payment_intent_id, credits_purchased)
       VALUES (?, ?, 'USD', ?, 'completed', ?, ?)
     `);
 
     stmt.run(userId, amount, method, stripePaymentId, creditsPurchased || null);
+
+    // Record platform revenue share (40% of payment goes to platform)
+    if (amount > 0) {
+      adminService.recordPlatformEarnings(
+        parseInt(stripePaymentId),
+        amount,
+        `Stripe payment - Platform revenue share (40%)`
+      );
+    }
   }
 }

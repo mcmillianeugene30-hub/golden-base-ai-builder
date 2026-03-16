@@ -41,7 +41,7 @@ subscriptionRouter.get('/current', async (c) => {
   }
 
   const subscriptionService = new SubscriptionService();
-  const subscription = await subscriptionService.getUserSubscription(user.id);
+  const subscription = await subscriptionService.getUserSubscription(user.id, user.fid);
   const creditBalance = await subscriptionService.getCreditBalance(user.id);
 
   const aiService = new AIService(creditBalance.balance, subscription?.tier || 'starter');

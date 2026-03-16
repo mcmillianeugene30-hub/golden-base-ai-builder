@@ -5,10 +5,12 @@
 import { createWalletClient, http, publicActions } from 'viem';
 import { base } from 'viem/chains';
 import { privateKeyToAccount } from 'viem/accounts';
-import { getDb } from '../lib/db';
+import { getDb } from '../../lib/db';
 import { SubscriptionService } from '../subscription';
+import { adminService } from '../admin';
 
-// Platform wallet for receiving payments
+// Platform wallet for receiving payments (from admin config)
+const PLATFORM_WALLET_ADDRESS = adminService.getPlatformWalletAddress();
 const PLATFORM_PRIVATE_KEY = process.env.PLATFORM_PRIVATE_KEY;
 const PLATFORM_WALLET = PLATFORM_PRIVATE_KEY
   ? privateKeyToAccount(PLATFORM_PRIVATE_KEY as `0x${string}`)
@@ -51,7 +53,7 @@ export class CryptoPaymentService {
       // Return existing payment if less than 30 minutes old
       const pkg = JSON.parse(existing.metadata as string);
       return {
-        address: PLATFORM_WALLET?.address || '0x0000000000000000000000000000000000000000',
+        address: PLATFORM_WALLET_ADDRESS,
         amount: pkg.amount,
         contract: currency === 'usdc' ? USDC_ADDRESS : undefined
       };
@@ -80,7 +82,7 @@ export class CryptoPaymentService {
     );
 
     return {
-      address: PLATFORM_WALLET?.address || '0x0000000000000000000000000000000000000000',
+      address: PLATFORM_WALLET_ADDRESS,
       amount,
       contract: currency === 'usdc' ? USDC_ADDRESS : undefined
     };
@@ -135,6 +137,13 @@ export class CryptoPaymentService {
           `Crypto payment verified (TX: ${txHash})`
         );
 
+        // Record platform revenue share (40% of payment goes to platform)
+        adminService.recordPlatformEarnings(
+          payment.id,
+          payment.amount,
+          `Crypto payment - Platform revenue share (40%)`
+        );
+
         return { success: true, creditsAdded: payment.credits_purchased };
       }
 
@@ -164,7 +173,7 @@ export class CryptoPaymentService {
       const tx = await client.getTransaction({ hash: txHash as `0x${string}` });
 
       // Check if transaction is to platform wallet
-      if (tx.to?.toLowerCase() !== PLATFORM_WALLET?.address.toLowerCase()) {
+      if (tx.to?.toLowerCase() !== PLATFORM_WALLET_ADDRESS.toLowerCase()) {
         return false;
       }
 
