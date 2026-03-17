@@ -1,197 +1,241 @@
-# GOLDEN BASE AI BUILDER
+# GOLDEN BASE AI BUILDER 🚀
 
-A comprehensive AI-powered application builder platform for Farcaster and Base blockchain.
+A comprehensive AI-powered application builder platform for Farcaster and Base blockchain with subscription-based monetization.
 
-## Features
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Next.js](https://img.shields.io/badge/Next.js-16-black?style=flat&logo=next.js)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=flat&logo=typescript)
 
-- **AI-Powered App Generation**: Generate production-ready apps using multiple AI providers (Groq, OpenRouter, OpenAI, Gemini)
-- **Subscription System**: Multiple tiers (Starter, Growth, Pro, Enterprise) with credit-based pricing
-- **Payment Processing**: Stripe, Base crypto (USDC/ETH), and Farcaster Frames
-- **20+ Connectors**: Integrate with GitHub, Vercel, Netlify, Supabase, and more
-- **Marketplace**: Browse and submit apps and connectors
-- **Token Deployment**: Deploy ERC-20 tokens on Base via Flaunch
-- **DeFi Features**: GoldenSwap integration for swaps, staking, and farming
-- **Admin Dashboard**: Full admin access for platform owner (FID: 1378286)
+## 🌟 Features
 
-## Tech Stack
+### Core Platform
+- **AI-Powered App Generation**: Generate production-ready apps using multiple AI providers
+- **No Free Tier**: All features require paid subscriptions or credits
+- **Admin Access**: Unlimited access for platform owner (FID: 1378286)
+- **Credit System**: Track all usage and deduct credits accordingly
+
+### AI Providers
+- **Groq** (Free API - Llama models, very fast)
+- **OpenRouter** (Free API - Multiple models)
+- **OpenAI** (Premium - GPT models)
+- **Gemini** (Premium - Google models)
+
+### Payment Systems
+- **Stripe**: Credit card subscriptions and one-time credit packs
+- **Base Crypto**: USDC and ETH payments on Base network
+- **Farcaster Frames**: One-tap purchases via Frames
+
+### Subscription Tiers
+| Tier | Price | Credits | Apps | Features |
+|------|--------|----------|-------|----------|
+| Starter | $1.99/mo | 500 | 3 | Basic AI, templates |
+| Growth | $4.99/mo | 2,000 | 10 | Basic connectors, analytics |
+| Pro | $9.99/mo | 5,000 | 25 | All AI & connectors, DeFi |
+| Enterprise | $29.99/mo | 15,000 | 100 | Priority access, API access |
+
+### Connectors (20+)
+**Development**: Vercel, Netlify, Cloudflare Pages, Supabase, Railway
+**Developer Tools**: GitHub, Linear, Notion, Slack, Discord, GitLab
+**Crypto/Web3**: Alchemy, Infura, QuickNode, Moralis, Covalent, Dune Analytics, The Graph
+**Payments**: Coinbase, Uniswap, Aave
+**Storage**: AWS S3, IPFS, Cloudflare R2
+
+## 🛠️ Tech Stack
 
 - **Frontend**: Next.js 14 (App Router) + TypeScript + Tailwind CSS
 - **Backend**: Next.js API Routes
 - **Database**: PostgreSQL with Prisma ORM
-- **Authentication**: NextAuth.js + Privy
+- **Authentication**: NextAuth.js + Farcaster
 - **Payments**: Stripe + Viem (Base blockchain)
-- **AI**: Groq, OpenRouter, OpenAI, Gemini
-- **Deployment**: Vercel (frontend) + Railway/Fly.io (backend)
+- **AI**: Groq, OpenRouter, OpenAI, Gemini APIs
+- **Deployment**: Vercel (frontend)
 
-## Getting Started
+## 📦 Installation
 
-### Prerequisites
-
-- Node.js 18+ and npm
-- PostgreSQL database
-- Stripe account
-- AI API keys (Groq, OpenRouter, etc.)
-
-### Installation
-
-1. Clone the repository:
 ```bash
+# Clone repository
 git clone <repository-url>
 cd golden-base-ai-builder
-```
 
-2. Install dependencies:
-```bash
+# Install dependencies
 npm install
-```
 
-3. Set up environment variables:
-```bash
+# Set up environment variables
 cp .env.example .env.local
-```
 
-4. Configure your environment variables in `.env.local`:
-- Database connection string
-- AI API keys
-- Stripe keys
-- Admin configuration
+# Configure your environment variables in .env.local
+# See DEPLOYMENT.md for full list
 
-5. Initialize the database:
-```bash
+# Initialize database
 npx prisma generate
 npx prisma db push
-```
 
-6. Run the development server:
-```bash
+# Seed database (optional - adds connectors)
+npm run db:seed
+
+# Start development server
 npm run dev
 ```
 
-7. Open [http://localhost:3000](http://localhost:3000) in your browser
+Open http://localhost:3000
 
-## Environment Variables
+## 🔧 Environment Variables
 
-See `.env.example` for all required environment variables.
+Required variables (see `.env.example` for full list):
 
-Key variables:
-- `DATABASE_URL`: PostgreSQL connection string
-- `GROQ_API_KEY`: Groq API key for AI generation
-- `OPENROUTER_API_KEY`: OpenRouter API key
-- `STRIPE_SECRET_KEY`: Stripe secret key
-- `ADMIN_FID`: Admin Farcaster ID (1378286)
+```bash
+DATABASE_URL=postgresql://...
+GROQ_API_KEY=gsk_...
+OPENROUTER_API_KEY=sk-or-...
+OPENAI_API_KEY=sk-...
+STRIPE_SECRET_KEY=sk_test_...
+NEXTAUTH_SECRET=...
+NEXTAUTH_URL=http://localhost:3000
+ADMIN_FID=1378286
+```
 
-## Project Structure
+## 📚 Project Structure
 
 ```
 golden-base-ai-builder/
 ├── src/
 │   ├── app/                    # Next.js App Router
-│   │   ├── page.tsx           # Landing page
-│   │   ├── pricing/           # Pricing page
+│   │   ├── (dashboard)/        # Protected dashboard routes
+│   │   │   ├── builder/       # AI app builder
+│   │   │   ├── apps/          # User's apps
+│   │   │   ├── billing/       # Subscription & credits
+│   │   │   ├── connectors/    # Connector marketplace
+│   │   │   ├── marketplace/   # App marketplace
+│   │   │   ├── settings/      # User settings
+│   │   │   └── admin/         # Admin dashboard
 │   │   ├── api/               # API routes
-│   │   └── (dashboard)/       # Protected dashboard routes
+│   │   ├── login/             # Authentication page
+│   │   ├── pricing/           # Pricing page
+│   │   └── page.tsx          # Landing page
 │   ├── components/            # React components
-│   ├── lib/                   # Utilities and services
-│   └── types/                 # TypeScript types
+│   │   ├── dashboard/        # Dashboard components
+│   │   └── ui/              # Reusable UI components
+│   ├── lib/                  # Utilities and services
+│   │   ├── ai.ts            # AI service layer
+│   │   ├── db.ts            # Prisma client
+│   │   ├── stripe.ts        # Stripe integration
+│   │   └── crypto.ts        # Base crypto utilities
+│   └── types/               # TypeScript types
 ├── packages/
-│   ├── config/                # Platform configuration
-│   └── db/                    # Prisma schema
-└── public/                   # Static assets
+│   ├── config/              # Platform configuration
+│   └── db/                 # Prisma schema and seeds
+└── public/                 # Static assets
 ```
 
-## Payment Methods
+## 🎯 Key Features
 
-### Stripe (Credit Cards)
-- Monthly subscriptions
-- One-time credit packs
-- Webhook handling for updates
+### AI App Builder
+- Natural language app generation
+- Multiple AI provider support
+- Live preview functionality
+- Code export as HTML/React
 
-### Base Crypto
-- USDC payments
-- ETH payments
-- Transaction verification
+### Credit System
+- All platform features require credits
+- Subscription tiers include monthly credits
+- One-time credit packs available
+- Usage tracking and history
 
-### Farcaster Frames
-- One-tap purchases
-- Frame manifests
-- Cast generation
+### Admin Dashboard
+- Full platform analytics
+- User management
+- Revenue tracking
+- Marketplace approval
+- Connector revenue payouts
 
-## Subscription Tiers
+### Marketplace
+- Browse and install apps
+- Submit custom apps
+- Connector marketplace
+- Revenue sharing (60% developer, 40% platform)
 
-### Starter - $1.99/month
-- 500 credits/month
-- Up to 3 apps
-- Basic AI providers (Groq, OpenRouter)
+## 🚀 Deployment
 
-### Growth - $4.99/month
-- 2,000 credits/month
-- Up to 10 apps
-- Basic connectors
+See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed deployment instructions.
 
-### Pro - $9.99/month
-- 5,000 credits/month
-- Up to 25 apps
-- All AI providers and connectors
+### Quick Start (Vercel)
 
-### Enterprise - $29.99/month
-- 15,000 credits/month
-- Up to 100 apps
-- Priority access and support
-
-## Credit System
-
-All platform features require credits:
-- App generation: 50-200 credits (free AI), 300-800 credits (premium AI)
-- Code editing: 20-100 credits
-- Deployment: 100 credits
-- Connector usage: 10-100 credits
-
-## Connectors
-
-Available connectors include:
-- **Development**: Vercel, Netlify, Cloudflare Pages, Supabase, Railway
-- **Developer Tools**: GitHub, Linear, Notion, Slack, Discord, GitLab
-- **Crypto/Web3**: Alchemy, Infura, QuickNode, Moralis, Covalent, Dune Analytics
-- **Payments**: Coinbase, Uniswap, Aave
-- **Storage**: AWS S3, IPFS, Cloudflare R2
-
-## Admin Access
-
-Admin user (FID: 1378286) has:
-- Free unlimited access to all features
-- Full dashboard access
-- User management capabilities
-- Marketplace approval authority
-- Revenue tracking and payout management
-
-## Deployment
-
-### Vercel (Frontend)
 ```bash
+npm i -g vercel
+vercel login
 vercel --prod
 ```
 
-### Railway/Fly.io (Backend)
-Deploy the API routes and background workers.
+Configure environment variables in Vercel dashboard.
 
-## Contributing
+## 👤 Admin Access
 
-Contributions are welcome! Please open an issue or submit a pull request.
+**Admin User** (FID: 1378286, username: urbanwarrior79)
+- FREE unlimited access to all features
+- FREE unlimited app creation and deployment
+- FREE unlimited AI generation (all providers)
+- FREE unlimited connector usage
+- Full admin dashboard access
+- View all user data and platform analytics
+- Approve/reject marketplace submissions
+- Manage connector earnings payouts
 
-## License
+## 💰 Payment Collection
+
+**Platform Wallet**: `0xcc9569bF1d87B7a18BD3363413b823AaF06084d3`
+
+- All Stripe payouts route to this wallet
+- All crypto payments (USDC/ETH on Base) route to this wallet
+- All Farcaster Frames payments route to this wallet
+- 40% platform revenue share from connector marketplace
+- Admin can withdraw anytime via dashboard
+
+## 📖 Documentation
+
+- [Deployment Guide](DEPLOYMENT.md)
+- [API Documentation](API.md)
+- [CTO Guide](CTO_GUIDE.md)
+- [Changes Summary](CHANGES_SUMMARY.md)
+
+## 🧪 Testing
+
+```bash
+# Run linter
+npm run lint
+
+# Build for production
+npm run build
+
+# Start production server
+npm start
+```
+
+## 🤝 Contributing
+
+Contributions are welcome! Please:
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
+
+## 📄 License
 
 MIT License - see LICENSE file for details.
 
-## Support
+## 🆘 Support
 
-For support, email support@goldenbase.ai or join our Farcaster channel.
+- **Email**: support@goldenbase.ai
+- **Farcaster**: @urbanwarrior79
+- **Issues**: GitHub Issues
 
-## Roadmap
+## 🙏 Acknowledgments
 
-- [ ] Enhanced AI fine-tuning
-- [ ] More connector integrations
-- [ ] Mobile app development
-- [ ] Advanced analytics dashboard
-- [ ] White-label solutions
+- Next.js team for the amazing framework
+- Prisma for the excellent ORM
+- Stripe for payment infrastructure
+- Farcaster community
+- AI providers: Groq, OpenRouter, OpenAI, Gemini
 
-Built with ❤️ by the Golden Base AI Builder team
+---
+
+Built with ❤️ for the Farcaster and Base ecosystem
